@@ -1,0 +1,36 @@
+dy7 <- function(target,nums){
+  if (length(nums)==1){
+    if(nums==target){return(T)}
+    else{return(F)}
+  }
+  if(str_ends(target,as.character(nums[1]))==T&!target==nums[1]){
+    new <- as.numeric(str_trunc(target,width=(nchar(target)-nchar(nums[1])),side="right",ellipsis=""))
+    if(new==nums[2]&length(nums)==2){return(T)}
+    else{
+      res <- dy7(new,nums[-1])
+      if(res==T){return(res)}
+    }
+  }
+  if(target/nums[1]>0&target%%nums[1]==0){
+    if(target/nums[1]==nums[2] & length(nums)==2){return(T)}
+    res <- dy7(target/nums[1],nums[-1])
+    if(res==T){return(res)}
+  }
+  if(target-nums[1]>0){
+    res <- dy7(target-nums[1],nums[-1])
+    if(res==T){return(res)}
+  }
+  return(F)
+}
+
+d24.7<-aoc_get_response(7, session_cookie ) %>% content(encoding = 'UTF-8') %>%read_lines() %>% str_split(": ",simplify=T)
+d7.1 <- as.numeric(d24.7[,1])
+d7.2 <- d24.7[,2] %>% str_split(" ")%>% lapply(rev) %>% lapply(as.numeric)
+tot=0
+
+tt=Sys.time()
+for(i in seq(d7.1)){
+  tot=tot+dy7(d7.1[i],d7.2[[i]])*d7.1[i]
+}
+format(tot,scientific = F)
+Sys.time()-tt
