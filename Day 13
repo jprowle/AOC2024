@@ -1,0 +1,32 @@
+d24.13<-aoc_get_response(13, session_cookie ) %>% 
+  content(encoding = 'UTF-8') %>%read_lines() %>% str_extract_all("\\d+",simplify=T) %>% apply(c(1,2),as.numeric) 
+d24.13 <- d24.13[complete.cases(d24.13),]
+
+#part1
+tot <- 0
+for (i in seq(nrow(d24.13)/3)){
+  j=(i-1)*3+1
+  a=t(d24.13[j:(j+1),])
+  b=d24.13[j+2,]
+  z=round(solve(a,b),9)
+  if(sum(z%%1)==0){
+    tot=tot+z[1]*3+z[2]
+  }
+}
+tot
+
+#part2
+library(Rmpfr)
+tot <- 0
+for (i in seq(nrow(d24.13)/3)){
+  j <- (i-1)*3+1
+  a <- mpfr(t(d24.13[j:(j+1),]),128)
+  b <- mpfr(d24.13[j+2,]+10000000000000,128)
+  A <- round((b[2]*(a[1,2]/a[2,2])-b[1]) /(a[2,1]*(a[1,2]/a[2,2])-a[1,1]),10)
+  B <- round((b[1]-a[1,1]*A)/a[1,2],10) 
+
+  if(sum(A%%1,B%%1)==0){
+      tot <- tot+A*3+B
+  }
+}
+tot
