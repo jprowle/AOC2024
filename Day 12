@@ -1,0 +1,51 @@
+library(igraph)
+
+d24.12<-aoc_get_response(12, session_cookie ) %>% 
+  content(encoding = 'UTF-8') %>%read_lines() %>% str_split("",simplify=T) 
+
+x <- which(nchar(d24.12)==1,arr.ind = T) #just all the coordinates
+y <- seq(d24.12) #and all the indices
+
+mp12 <- NULL
+for(i in seq(y)){
+  v <- y[rowSums(cbind(abs(x[,1]-x[i,1]),abs(x[,2]-x[i,2])))==1 & (d24.12[i]==d24.12)]
+  if(length(v>0)){mp12 <- rbind(mp12,matrix(c(rep(i,length(v)),v),ncol=2))}
+}
+
+mp12.1 <- as.vector(t(mp12))
+
+G12 <- make_graph(mp12.1,directed=F)
+d12 <- components(G12)
+
+tot1 <- NULL
+for(j in 1:d12$no){
+  tot=0
+  for(i in seq(d12$csize[j])){
+    tot <- tot+sum(mp12[,1]==y[d12$membership==j][i])}
+  tot1 <- c(tot1,(4*d12$csize[j]-tot)*d12$csize[j])
+}
+sum(tot1)
+
+tot1 <- 0
+u <- matrix(c(0,1,1,0,1,1),ncol=2,byrow=T)
+u1 <- matrix(c(0,-1,1,0,1,-1),ncol=2,byrow=T)
+u2 <- matrix(c(0,-1,-1,0,-1,-1),ncol=2,byrow=T)
+u3 <- matrix(c(0,1,-1,0,-1,1),ncol=2,byrow=T)
+
+for(j in 1:d12$no){
+    X <- x[d12$membership==j,] %>% matrix(ncol=2)
+    XX <- apply(X,1,paste,collapse=",")
+    tot <- 0
+    for(i in 1:(nrow(X))){
+      v <- sweep(u,2,X[i,],"+") %>% apply(1,paste,collapse=",")%in%XX
+      if(identical(v,c(F,F,F))|identical(v,c(T,T,F))|identical(v,c(F,F,T))){tot <- tot+1}
+      v <- sweep(u1,2,X[i,],"+") %>% apply(1,paste,collapse=",")%in%XX
+      if(identical(v,c(F,F,F))|identical(v,c(T,T,F))|identical(v,c(F,F,T))){tot <- tot+1}
+      v <- sweep(u2,2,X[i,],"+") %>% apply(1,paste,collapse=",")%in%XX
+      if(identical(v,c(F,F,F))|identical(v,c(T,T,F))|identical(v,c(F,F,T))){tot <- tot+1}
+      v <- sweep(u3,2,X[i,],"+") %>% apply(1,paste,collapse=",")%in%XX
+      if(identical(v,c(F,F,F))|identical(v,c(T,T,F))|identical(v,c(F,F,T))){tot <- tot+1}
+  }
+  tot1 <- tot1+d12$csize[j]*tot
+}
+tot1
